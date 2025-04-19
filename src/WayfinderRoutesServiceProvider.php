@@ -2,9 +2,9 @@
 
 namespace NckRtl\WayfinderRoutes;
 
+use NckRtl\WayfinderRoutes\Commands\WayfinderRoutesCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use NckRtl\WayfinderRoutes\Commands\WayfinderRoutesCommand;
 
 class WayfinderRoutesServiceProvider extends PackageServiceProvider
 {
