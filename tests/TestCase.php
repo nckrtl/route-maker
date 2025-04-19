@@ -1,10 +1,10 @@
 <?php
 
-namespace VendorName\Skeleton\Tests;
+namespace NckRtl\WayfinderRoutes\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use NckRtl\WayfinderRoutes\WayfinderRoutesServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use VendorName\Skeleton\SkeletonServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -13,14 +13,14 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'VendorName\\Skeleton\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'NckRtl\\WayfinderRoutes\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            SkeletonServiceProvider::class,
+            WayfinderRoutesServiceProvider::class,
         ];
     }
 
@@ -28,10 +28,40 @@ class TestCase extends Orchestra
     {
         config()->set('database.default', 'testing');
 
-        /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/database/migrations') as $migration) {
-            (include $migration->getRealPath())->up();
-         }
-         */
+        // Override app_path to point to our test directory
+        $app->bind('path', function () {
+            return __DIR__;
+        });
+
+        // Override app_path helper
+        $app->bind('path.app', function () {
+            return __DIR__;
+        });
+
+        // Override the app_path helper function
+        $app->bind('app.path', function () {
+            return __DIR__;
+        });
+
+        // Override the app namespace
+        $app['config']->set('app.namespace', 'NckRtl\\WayfinderRoutes\\Tests');
+
+        // Override the app_path helper function globally
+        $app->bind('app_path', function () {
+            return __DIR__;
+        });
+
+        // Override the app_path helper function with argument
+        $app->bind('app_path.*', function ($app, $parameters) {
+            return __DIR__.'/'.ltrim($parameters[0], '/');
+        });
+
+        // Set up test controllers
+        $app['config']->set('inertia.testing.page_paths', [__DIR__.'/Controllers']);
+
+        // Add our test controllers to the autoloader
+        $app['config']->set('app.controllers', [
+            __DIR__.'/Controllers',
+        ]);
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace NckRtl\WayfinderRoutes;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use VendorName\Skeleton\Commands\SkeletonCommand;
+use NckRtl\WayfinderRoutes\Commands\WayfinderRoutesCommand;
 
-class SkeletonServiceProvider extends PackageServiceProvider
+class WayfinderRoutesServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class SkeletonServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('skeleton')
+            ->name('wayfinder-routes')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_migration_table_name_table')
-            ->hasCommand(SkeletonCommand::class);
+            ->hasMigration('create_wayfinder_routes_table')
+            ->hasCommand(WayfinderRoutesCommand::class);
     }
 }

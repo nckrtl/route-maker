@@ -1,0 +1,123 @@
+<?php
+
+namespace NckRtl\WayfinderRoutes;
+
+use Illuminate\Support\Str;
+use NckRtl\WayfinderRoutes\Enums\HttpMethod;
+
+class WayfinderRoutes
+{
+    protected static ?string $controllerPath = null;
+
+    protected static ?string $controllerNamespace = null;
+
+    public static function routes()
+    {
+        if (file_exists(base_path('routes/wayfinder.php'))) {
+            require base_path('routes/wayfinder.php');
+        }
+    }
+
+    public static function setControllerPath(?string $path, ?string $namespace = null): void
+    {
+        self::$controllerPath = $path ?? app_path('Http/Controllers');
+        self::$controllerNamespace = $namespace ?? 'App\\Http\\Controllers';
+    }
+
+    public static function generateRouteDefinitions(): array
+    {
+        $groupedRoutes = [];
+
+        $controllerPath = self::$controllerPath ?? app_path('Http/Controllers');
+        $namespace = self::$controllerNamespace ?? 'App\\Http\\Controllers';
+
+        $files = (new \Symfony\Component\Finder\Finder)->files()->in($controllerPath)->name('*Controller.php');
+
+        foreach ($files as $file) {
+            $relativePath = str_replace([$controllerPath.'/', '.php'], ['', ''], $file->getRealPath());
+            $class = $namespace.'\\'.str_replace('/', '\\', $relativePath);
+
+            if (! class_exists($class)) {
+                continue;
+            }
+
+            $reflection = new \ReflectionClass($class);
+            $routePrefix = $reflection->hasProperty('routePrefix')
+                ? $reflection->getStaticPropertyValue('routePrefix')
+                : null;
+
+            foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+                if ($method->class !== $class) {
+                    continue;
+                }
+
+                $returnType = $method->getReturnType();
+                if (! $returnType instanceof \ReflectionNamedType ||
+                    $returnType->getName() !== \Inertia\Response::class) {
+                    continue;
+                }
+
+                $attribute = collect($method->getAttributes(Route::class))->first();
+                $routeAttr = $attribute ? $attribute->newInstance() : null;
+
+                $httpMethod = strtolower($routeAttr?->method->value ?? HttpMethod::GET->value);
+                $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters);
+                $routeName = self::generateRouteName($routePrefix, $method->name, $routeAttr?->name);
+
+                $escapedClass = '\\'.ltrim($class, '\\');
+                $definition = sprintf(
+                    "Route::%s('%s', [%s::class, '%s'])->name('%s');",
+                    $httpMethod,
+                    $uri,
+                    $escapedClass,
+                    $method->name,
+                    $routeName
+                );
+
+                $groupKey = $routePrefix ?? '/';
+                $groupedRoutes[$groupKey][] = $definition;
+            }
+        }
+
+        // Flatten the grouped definitions into a single array, with group comments
+        $flattened = [];
+        foreach ($groupedRoutes as $prefix => $routes) {
+            $flattened[] = '// /'.trim($prefix, '/');
+            foreach ($routes as $definition) {
+                $flattened[] = $definition;
+            }
+            $flattened[] = ''; // Add a blank line between groups
+        }
+
+        return $flattened;
+    }
+
+    protected static function generateUri(?string $prefix, ?string $customUri, ?array $parameters): string
+    {
+        if ($customUri) {
+            return '/'.ltrim($customUri, '/');
+        }
+
+        $uri = $prefix ? '/'.trim($prefix, '/') : '/';
+
+        if ($parameters) {
+            $wrappedParams = array_map(fn ($param) => '{'.$param.'}', $parameters);
+            $uri = rtrim($uri, '/').'/'.implode('/', $wrappedParams);
+        }
+
+        return $uri === '' ? '/' : $uri;
+    }
+
+    protected static function generateRouteName(?string $prefix, string $methodName, ?string $customName): string
+    {
+        if ($customName) {
+            return $customName;
+        }
+
+        if ($prefix) {
+            return Str::singular($prefix).'.'.$methodName;
+        }
+
+        return $methodName === 'show' ? 'home' : $methodName;
+    }
+}
