@@ -68,12 +68,6 @@ class RouteMaker
                     continue;
                 }
 
-                $returnType = $method->getReturnType();
-                if (! $returnType instanceof \ReflectionNamedType ||
-                    $returnType->getName() !== \Inertia\Response::class) {
-                    continue;
-                }
-
                 $attribute = collect($method->getAttributes(Route::class))->first();
                 $routeAttr = $attribute ? $attribute->newInstance() : null;
 
