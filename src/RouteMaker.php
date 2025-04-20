@@ -24,6 +24,19 @@ class RouteMaker
         self::$controllerNamespace = $namespace ?? 'App\\Http\\Controllers';
     }
 
+    protected static function getMethodDefault(string $methodName): ?HttpMethod
+    {
+        $defaults = config('route-maker.method_defaults', []);
+
+        foreach ($defaults as $method => $methodNames) {
+            if (in_array($methodName, $methodNames)) {
+                return HttpMethod::from($method);
+            }
+        }
+
+        return null;
+    }
+
     public static function generateRouteDefinitions(): array
     {
         $groupedRoutes = [];
@@ -71,7 +84,10 @@ class RouteMaker
 
                 $combinedMiddleware = array_unique(array_merge($controllerMiddleware, $routeMiddleware));
 
-                $httpMethod = strtolower($routeAttr?->method->value ?? HttpMethod::GET->value);
+                // Use the explicit method from the attribute if set, otherwise use the default based on method name
+                $httpMethod = $routeAttr?->method ?? self::getMethodDefault($method->name) ?? HttpMethod::GET;
+                $httpMethod = strtolower($httpMethod->value);
+
                 $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters);
                 $routeName = self::generateRouteName($routePrefix, $method->name, $routeAttr?->name);
 
