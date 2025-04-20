@@ -1,19 +1,6 @@
-# This is my package route-maker
+# Route Maker
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/nckrtl/route-maker.svg?style=flat-square)](https://packagist.org/packages/nckrtl/route-maker)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/route-maker/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/nckrtl/route-maker/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/route-maker/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/nckrtl/route-maker/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/nckrtl/route-maker.svg?style=flat-square)](https://packagist.org/packages/nckrtl/route-maker)
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/route-maker.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/route-maker)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+This Laravel packages lets you generate a routes file based on your public controller methods. This package works particularly well with Laravel Wayfinder, as it allows you to reference controller methods instead of just routes. Based on the method signature in your controllers we could generate a routes file, automating route management entirely.
 
 ## Installation
 
@@ -40,20 +27,72 @@ This is the contents of the published config file:
 
 ```php
 return [
+    'method_defaults' => [
+        'GET' => ['index', 'show'],
+        'POST' => ['store'],
+        'PUT' => ['update'],
+        'DELETE' => ['destroy'],,
+    ],
 ];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="route-maker-views"
 ```
 
 ## Usage
 
+Update your vite config to include an additional run command:
+
+```ts
+import { run } from "vite-plugin-run";
+
+export default defineConfig({
+    plugins: [
+        run([
+            {
+                name: "route-maker",
+                run: ["php", "artisan", "route-maker:make"],
+                pattern: ["app/**/Http/**/*.php"],
+            },
+        ]),
+    ],
+});
+```
+
+Next, update your main routes file to include the generated routes with:
+
 ```php
-$RouteMaker = new NckRtl\RouteMaker();
-echo $RouteMaker->echoPhrase('Hello, NckRtl!');
+use NckRtl\RouteMaker\Facades\RouteMaker;
+
+RouteMaker::routes();
+```
+
+Now you're all set. Running vite dev should nog generate the routes based on your controller methods. On file change of any controller the routes file will be regenerated.
+
+### Setting route parameters and other properties.
+
+To influence the route that is being generated you can you the `Route` attribute. For example you can define a route parameter like so:
+
+```php
+use NckRtl\RouteMaker\Route;
+
+...
+
+#[Route(parameters: ['article:slug'])]
+public function show(Article $article): \Inertia\Response
+{
+    return inertia('Article/Show', [
+        'article' => $article->data->forDisplay(),
+    ]);
+}
+```
+
+Other route properties are also supported like `middleware`. Besides setting middelware on specific methods you can also set them at the controller level, just as a prefix:
+
+```php
+class ArticleController extends Controller
+{
+    protected static string $routePrefix = 'articles';
+    protected static string $routeMiddleware = 'auth:verified';
+
+    ...
 ```
 
 ## Testing
@@ -68,7 +107,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Feel free to contribute. Make sure to add/update tests for new or improved features.
 
 ## Security Vulnerabilities
 
