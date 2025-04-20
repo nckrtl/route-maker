@@ -1,15 +1,17 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Tests\Http\Controllers;
+namespace NckRtl\RouteMaker\Tests\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\WayfinderRoutes\Enums\HttpMethod;
-use NckRtl\WayfinderRoutes\Route;
+use NckRtl\RouteMaker\Enums\HttpMethod;
+use NckRtl\RouteMaker\Route;
 
 class ArticleController extends Controller
 {
     protected static string $routePrefix = 'articles';
+
+    protected static array $routeMiddleware = ['auth', 'verified'];
 
     #[Route(parameters: ['article:slug'])]
     public function show(string $article): Response

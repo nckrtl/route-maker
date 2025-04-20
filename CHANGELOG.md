@@ -1,3 +1,3 @@
 # Changelog
 
-All notable changes to `wayfinder-routes` will be documented in this file.
+All notable changes to `route-maker` will be documented in this file.

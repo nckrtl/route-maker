@@ -1,11 +1,11 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes;
+namespace NckRtl\RouteMaker;
 
 use Illuminate\Support\Str;
-use NckRtl\WayfinderRoutes\Enums\HttpMethod;
+use NckRtl\RouteMaker\Enums\HttpMethod;
 
-class WayfinderRoutes
+class RouteMaker
 {
     protected static ?string $controllerPath = null;
 
@@ -13,8 +13,8 @@ class WayfinderRoutes
 
     public static function routes()
     {
-        if (file_exists(base_path('routes/wayfinder.php'))) {
-            require base_path('routes/wayfinder.php');
+        if (file_exists(base_path('routes/route-maker.php'))) {
+            require base_path('routes/route-maker.php');
         }
     }
 
@@ -46,6 +46,10 @@ class WayfinderRoutes
                 ? $reflection->getStaticPropertyValue('routePrefix')
                 : null;
 
+            $controllerMiddleware = $reflection->hasProperty('routeMiddleware')
+                ? $reflection->getStaticPropertyValue('routeMiddleware')
+                : [];
+
             foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 if ($method->class !== $class) {
                     continue;
@@ -60,19 +64,32 @@ class WayfinderRoutes
                 $attribute = collect($method->getAttributes(Route::class))->first();
                 $routeAttr = $attribute ? $attribute->newInstance() : null;
 
+                $routeMiddleware = $routeAttr?->middleware ?? [];
+                if (is_string($routeMiddleware)) {
+                    $routeMiddleware = [$routeMiddleware];
+                }
+
+                $combinedMiddleware = array_unique(array_merge($controllerMiddleware, $routeMiddleware));
+
                 $httpMethod = strtolower($routeAttr?->method->value ?? HttpMethod::GET->value);
                 $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters);
                 $routeName = self::generateRouteName($routePrefix, $method->name, $routeAttr?->name);
 
                 $escapedClass = '\\'.ltrim($class, '\\');
                 $definition = sprintf(
-                    "Route::%s('%s', [%s::class, '%s'])->name('%s');",
+                    "Route::%s('%s', [%s::class, '%s'])->name('%s')",
                     $httpMethod,
                     $uri,
                     $escapedClass,
                     $method->name,
                     $routeName
                 );
+
+                if (! empty($combinedMiddleware)) {
+                    $definition .= sprintf('->middleware(%s)', self::formatMiddleware($combinedMiddleware));
+                }
+
+                $definition .= ';';
 
                 $groupKey = $routePrefix ?? '/';
                 $groupedRoutes[$groupKey][] = $definition;
@@ -90,6 +107,15 @@ class WayfinderRoutes
         }
 
         return $flattened;
+    }
+
+    protected static function formatMiddleware(array $middleware): string
+    {
+        if (count($middleware) === 1) {
+            return "'".$middleware[0]."'";
+        }
+
+        return '[\''.implode("', '", $middleware).'\']';
     }
 
     protected static function generateUri(?string $prefix, ?string $customUri, ?array $parameters): string

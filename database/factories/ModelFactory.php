@@ -1,6 +1,6 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Database\Factories;
+namespace NckRtl\RouteMaker\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

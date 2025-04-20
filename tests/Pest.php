@@ -1,5 +1,5 @@
 <?php
 
-use NckRtl\WayfinderRoutes\Tests\TestCase;
+use NckRtl\RouteMaker\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

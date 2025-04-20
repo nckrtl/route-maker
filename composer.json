@@ -1,12 +1,12 @@
 {
-    "name": "nckrtl/wayfinder-routes",
-    "description": "This is my package wayfinder-routes",
+    "name": "nckrtl/route-maker",
+    "description": "This is my package route-maker",
     "keywords": [
         "NckRtl",
         "laravel",
-        "wayfinder-routes"
+        "route-maker"
     ],
-    "homepage": "https://github.com/nckrtl/wayfinder-routes",
+    "homepage": "https://github.com/nckrtl/route-maker",
     "license": "MIT",
     "authors": [
         {
@@ -35,13 +35,13 @@
     },
     "autoload": {
         "psr-4": {
-            "NckRtl\\WayfinderRoutes\\": "src/",
-            "NckRtl\\WayfinderRoutes\\Database\\Factories\\": "database/factories/"
+            "NckRtl\\RouteMaker\\": "src/",
+            "NckRtl\\RouteMaker\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "NckRtl\\WayfinderRoutes\\Tests\\": "tests/",
+            "NckRtl\\RouteMaker\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -63,10 +63,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "NckRtl\\WayfinderRoutes\\WayfinderRoutesServiceProvider"
+                "NckRtl\\RouteMaker\\RouteMakerServiceProvider"
             ],
             "aliases": {
-                "WayfinderRoutes": "NckRtl\\WayfinderRoutes\\Facades\\WayfinderRoutes"
+                "RouteMaker": "NckRtl\\RouteMaker\\Facades\\RouteMaker"
             }
         }
     },

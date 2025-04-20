@@ -1,12 +1,12 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes;
+namespace NckRtl\RouteMaker;
 
+use NckRtl\RouteMaker\Commands\RouteMakerCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use NckRtl\WayfinderRoutes\Commands\WayfinderRoutesCommand;
 
-class WayfinderRoutesServiceProvider extends PackageServiceProvider
+class RouteMakerServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
@@ -16,10 +16,10 @@ class WayfinderRoutesServiceProvider extends PackageServiceProvider
          * More info: https://github.com/spatie/laravel-package-tools
          */
         $package
-            ->name('wayfinder-routes')
+            ->name('route-maker')
             ->hasConfigFile()
             ->hasViews()
             ->hasMigration('create_wayfinder_routes_table')
-            ->hasCommand(WayfinderRoutesCommand::class);
+            ->hasCommand(RouteMakerCommand::class);
     }
 }

@@ -1,15 +1,15 @@
-# This is my package wayfinder-routes
+# This is my package route-maker
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/nckrtl/wayfinder-routes.svg?style=flat-square)](https://packagist.org/packages/nckrtl/wayfinder-routes)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/wayfinder-routes/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/nckrtl/wayfinder-routes/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/wayfinder-routes/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/nckrtl/wayfinder-routes/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/nckrtl/wayfinder-routes.svg?style=flat-square)](https://packagist.org/packages/nckrtl/wayfinder-routes)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/nckrtl/route-maker.svg?style=flat-square)](https://packagist.org/packages/nckrtl/route-maker)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/route-maker/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/nckrtl/route-maker/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/nckrtl/route-maker/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/nckrtl/route-maker/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/nckrtl/route-maker.svg?style=flat-square)](https://packagist.org/packages/nckrtl/route-maker)
 
 This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
 
 ## Support us
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/wayfinder-routes.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/wayfinder-routes)
+[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/route-maker.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/route-maker)
 
 We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
 
@@ -20,20 +20,20 @@ We highly appreciate you sending us a postcard from your hometown, mentioning wh
 You can install the package via composer:
 
 ```bash
-composer require nckrtl/wayfinder-routes
+composer require nckrtl/route-maker
 ```
 
 You can publish and run the migrations with:
 
 ```bash
-php artisan vendor:publish --tag="wayfinder-routes-migrations"
+php artisan vendor:publish --tag="route-maker-migrations"
 php artisan migrate
 ```
 
 You can publish the config file with:
 
 ```bash
-php artisan vendor:publish --tag="wayfinder-routes-config"
+php artisan vendor:publish --tag="route-maker-config"
 ```
 
 This is the contents of the published config file:
@@ -46,14 +46,14 @@ return [
 Optionally, you can publish the views using
 
 ```bash
-php artisan vendor:publish --tag="wayfinder-routes-views"
+php artisan vendor:publish --tag="route-maker-views"
 ```
 
 ## Usage
 
 ```php
-$wayfinderRoutes = new NckRtl\WayfinderRoutes();
-echo $wayfinderRoutes->echoPhrase('Hello, NckRtl!');
+$RouteMaker = new NckRtl\RouteMaker();
+echo $RouteMaker->echoPhrase('Hello, NckRtl!');
 ```
 
 ## Testing
@@ -76,8 +76,8 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [nckrtl](https://github.com/nckrtl)
-- [All Contributors](../../contributors)
+-   [nckrtl](https://github.com/nckrtl)
+-   [All Contributors](../../contributors)
 
 ## License
 

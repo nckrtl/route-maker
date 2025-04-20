@@ -1,20 +1,20 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Commands;
+namespace NckRtl\RouteMaker\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use NckRtl\WayfinderRoutes\WayfinderRoutes;
+use NckRtl\RouteMaker\RouteMaker;
 
-class WayfinderRoutesCommand extends Command
+class RouteMakerCommand extends Command
 {
-    public $signature = 'wayfinder:routes';
+    public $signature = 'route-maker:make';
 
-    public $description = 'My command';
+    public $description = 'Generate routes for the application';
 
     public function handle(): int
     {
-        $filePath = base_path('routes/wayfinder.php');
+        $filePath = base_path('routes/route-maker.php');
 
         // Ensure the routes directory exists
         if (! File::exists(dirname($filePath))) {
@@ -22,7 +22,7 @@ class WayfinderRoutesCommand extends Command
         }
 
         // Generate routes
-        $routes = WayfinderRoutes::generateRouteDefinitions();
+        $routes = RouteMaker::generateRouteDefinitions();
 
         // Compose the full file content with opening tag + use statement
         $content = "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n".implode("\n", $routes)."\n";
@@ -30,7 +30,7 @@ class WayfinderRoutesCommand extends Command
         // Save the file
         File::put($filePath, $content);
 
-        $this->info('Wayfinder routes dumped successfully to routes/wayfinder.php');
+        $this->info('Wayfinder routes dumped successfully to routes/route-maker.php');
 
         return self::SUCCESS;
     }

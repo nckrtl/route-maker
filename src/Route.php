@@ -1,9 +1,9 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes;
+namespace NckRtl\RouteMaker;
 
 use Attribute;
-use NckRtl\WayfinderRoutes\Enums\HttpMethod;
+use NckRtl\RouteMaker\Enums\HttpMethod;
 
 #[Attribute]
 class Route
@@ -12,6 +12,7 @@ class Route
         public HttpMethod $method = HttpMethod::GET,
         public ?string $uri = null,
         public ?string $name = null,
-        public ?array $parameters = null
+        public ?array $parameters = null,
+        public array|string|null $middleware = null,
     ) {}
 }

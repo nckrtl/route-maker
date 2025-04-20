@@ -1,9 +1,9 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Tests;
+namespace NckRtl\RouteMaker\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use NckRtl\WayfinderRoutes\WayfinderRoutesServiceProvider;
+use NckRtl\RouteMaker\RouteMakerServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -13,14 +13,14 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'NckRtl\\WayfinderRoutes\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'NckRtl\\RouteMaker\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            WayfinderRoutesServiceProvider::class,
+            RouteMakerServiceProvider::class,
         ];
     }
 
@@ -44,7 +44,7 @@ class TestCase extends Orchestra
         });
 
         // Override the app namespace
-        $app['config']->set('app.namespace', 'NckRtl\\WayfinderRoutes\\Tests');
+        $app['config']->set('app.namespace', 'NckRtl\\RouteMaker\\Tests');
 
         // Override the app_path helper function globally
         $app->bind('app_path', function () {

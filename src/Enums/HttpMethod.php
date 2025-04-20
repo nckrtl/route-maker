@@ -1,6 +1,6 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Enums;
+namespace NckRtl\RouteMaker\Enums;
 
 enum HttpMethod: string
 {

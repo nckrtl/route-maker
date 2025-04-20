@@ -1,6 +1,6 @@
 <?php
 
-namespace NckRtl\WayfinderRoutes\Tests\Models;
+namespace NckRtl\RouteMaker\Tests\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
