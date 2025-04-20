@@ -77,15 +77,15 @@ class RouteMaker
                 $attribute = collect($method->getAttributes(Route::class))->first();
                 $routeAttr = $attribute ? $attribute->newInstance() : null;
 
-                $routeMiddleware = $routeAttr?->middleware ?? [];
-                if (is_string($routeMiddleware)) {
-                    $routeMiddleware = [$routeMiddleware];
+                $routeMiddleware = [];
+                if ($routeAttr && $routeAttr->middleware !== null) {
+                    $routeMiddleware = is_string($routeAttr->middleware) ? [$routeAttr->middleware] : $routeAttr->middleware;
                 }
 
                 $combinedMiddleware = array_unique(array_merge($controllerMiddleware, $routeMiddleware));
 
                 // Use the explicit method from the attribute if set, otherwise use the default based on method name
-                $httpMethod = $routeAttr?->method ?? self::getMethodDefault($method->name) ?? HttpMethod::GET;
+                $httpMethod = $routeAttr ? $routeAttr->method : (self::getMethodDefault($method->name) ?? HttpMethod::GET);
                 $httpMethod = strtolower($httpMethod->value);
 
                 $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters);
@@ -147,7 +147,7 @@ class RouteMaker
             $uri = rtrim($uri, '/').'/'.implode('/', $wrappedParams);
         }
 
-        return $uri === '' ? '/' : $uri;
+        return trim($uri, '/') === '' ? '/' : $uri;
     }
 
     protected static function generateRouteName(?string $prefix, string $methodName, ?string $customName): string
