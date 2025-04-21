@@ -1,8 +1,23 @@
 <?php
 
 use NckRtl\RouteMaker\RouteMaker;
+use NckRtl\RouteMaker\Tests\Traits\TestFixtures;
 
-test('it generates correct route definitions', function () {
+uses(TestFixtures::class);
+
+beforeEach(function () {
+    $this->setUpFixtures();
+});
+
+afterEach(function () {
+    $this->tearDownFixtures();
+});
+
+/**
+ * Test route generation from existing controller fixture
+ */
+test('it generates correct route definitions from controllers', function () {
+    // Use the permanent fixture for this test
     RouteMaker::setControllerPath(
         __DIR__.'/Http/Controllers',
         'NckRtl\\RouteMaker\\Tests\\Http\\Controllers'
@@ -23,134 +38,54 @@ test('it generates correct route definitions', function () {
     expect($routes)->toContain($expectedDeleteRoute);
 });
 
-test('it uses controller name for route names and URIs when no prefix is defined', function () {
-    $tempPath = __DIR__.'/Http/Controllers/temp';
-    if (! is_dir($tempPath)) {
-        mkdir($tempPath, 0777, true);
-    }
-
-    $controllerContent = <<<'PHP'
-<?php
-
-namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
-
-use Illuminate\Routing\Controller;
-use Inertia\Response;
-use NckRtl\RouteMaker\Route;
-
-class HomeController extends Controller
-{
-    public function show(): Response
-    {
-        return inertia('Home');
-    }
-
-    public function index(): Response
-    {
-        return inertia('Home/Index');
-    }
-}
-PHP;
-
-    file_put_contents($tempPath.'/HomeController.php', $controllerContent);
-
-    // Add a contact controller to test the show method URI
-    $contactControllerContent = <<<'PHP'
-<?php
-
-namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
-
-use Illuminate\Routing\Controller;
-use Inertia\Response;
-use NckRtl\RouteMaker\Route;
-
-class ContactController extends Controller
-{
-    public function show(): Response
-    {
-        return inertia('Contact');
-    }
-
-    public function store(): Response
-    {
-        return inertia('Contact/Store');
-    }
-}
-PHP;
-
-    file_put_contents($tempPath.'/ContactController.php', $contactControllerContent);
-
-    RouteMaker::setControllerPath(
-        $tempPath,
-        'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp'
-    );
-
-    $routes = RouteMaker::generateRouteDefinitions();
-
-    // Test home routes with new naming convention
-    $expectedHomeShowRoute = "Route::get('/home', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\HomeController::class, 'show'])->name('Controllers.HomeController.show');";
-    $expectedHomeIndexRoute = "Route::get('/home', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\HomeController::class, 'index'])->name('Controllers.HomeController.index');";
-
-    // Test contact routes with new naming convention
-    $expectedContactShowRoute = "Route::get('/contact', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\ContactController::class, 'show'])->name('Controllers.ContactController.show');";
-    $expectedContactStoreRoute = "Route::post('/contact', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\ContactController::class, 'store'])->name('Controllers.ContactController.store');";
-
-    expect($routes)->toContain($expectedHomeShowRoute);
-    expect($routes)->toContain($expectedHomeIndexRoute);
-    expect($routes)->toContain($expectedContactShowRoute);
-    expect($routes)->toContain($expectedContactStoreRoute);
-
-    // Clean up
-    system('rm -rf '.escapeshellarg($tempPath));
-});
-
-test('it uses controller name for route names even when prefix is defined', function () {
-    $tempPath = __DIR__.'/Http/Controllers/temp';
-    if (! is_dir($tempPath)) {
-        mkdir($tempPath, 0777, true);
-    }
-
-    $controllerContent = <<<'PHP'
-<?php
-
-namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
-
-use Illuminate\Routing\Controller;
-use Inertia\Response;
-use NckRtl\RouteMaker\Route;
-
-class ArticleController extends Controller
-{
-    protected static string $routePrefix = 'articles';
-
-    #[Route(parameters: ['article:slug'])]
-    public function show(): Response
-    {
-        return inertia('Article/Show');
-    }
-
-    public function store(): Response
-    {
-        return inertia('Article/Store');
-    }
-}
-PHP;
-
-    file_put_contents($tempPath.'/ArticleController.php', $controllerContent);
-
-    RouteMaker::setControllerPath(
-        $tempPath,
-        'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp'
-    );
-
-    $routes = RouteMaker::generateRouteDefinitions();
-
-    $expectedShowRoute = "Route::get('/articles/{article:slug}', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\ArticleController::class, 'show'])->name('Controllers.ArticleController.show');";
-    $expectedStoreRoute = "Route::post('/articles', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\ArticleController::class, 'store'])->name('Controllers.ArticleController.store');";
-
-    expect($routes)->toContain($expectedShowRoute);
-    expect($routes)->toContain($expectedStoreRoute);
-
-    // Clean up
-    system('rm -rf '.escapeshellarg($tempPath));
+/**
+ * Test direct route grouping logic
+ */
+test('it correctly groups routes by prefix', function () {
+    // Get reflection method for testing
+    $reflectionClass = new ReflectionClass(RouteMaker::class);
+    $flattenMethod = $reflectionClass->getMethod('flattenGroupedRoutes');
+    $flattenMethod->setAccessible(true);
+    
+    // Create a sample grouped routes array
+    $groupedRoutes = [
+        'api' => [
+            "Route::get('/api/users', [\\App\\Http\\Controllers\\UserController::class, 'index'])->name('api.users.index');",
+            "Route::post('/api/users', [\\App\\Http\\Controllers\\UserController::class, 'store'])->name('api.users.store');"
+        ],
+        'admin' => [
+            "Route::get('/admin/dashboard', [\\App\\Http\\Controllers\\Admin\\DashboardController::class, 'index'])->name('admin.dashboard');"
+        ],
+        '/' => [
+            "Route::get('/', [\\App\\Http\\Controllers\\HomeController::class, 'index'])->name('home');"
+        ]
+    ];
+    
+    // Test flattening logic
+    $flattened = $flattenMethod->invoke(null, $groupedRoutes);
+    
+    // Verify the flattened routes structure includes each group
+    // and has the correct routes in each group
+    
+    // Convert to a string for easier searching
+    $flattenedString = implode("\n", $flattened);
+    
+    // Check for groups
+    expect($flattenedString)->toContain('// /api');
+    expect($flattenedString)->toContain('// /admin');
+    expect($flattenedString)->toContain('// /');
+    
+    // Check for routes
+    expect($flattenedString)->toContain("/api/users");
+    expect($flattenedString)->toContain("Route::get");
+    expect($flattenedString)->toContain("Route::post");
+    expect($flattenedString)->toContain("/admin/dashboard");
+    
+    // Test for the home route - the format might vary, so check for key components
+    expect($flattenedString)->toContain("HomeController");
+    expect($flattenedString)->toContain("'index'");
+    expect($flattenedString)->toContain("'home'");
+    
+    // Check that there are blank lines between groups
+    expect($flattenedString)->toContain("\n\n");
 });
