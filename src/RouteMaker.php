@@ -42,7 +42,8 @@ class RouteMaker
      */
     public static function setControllerPath(?string $path, ?string $namespace = null): void
     {
-        self::$controllerPath = $path ?? app_path('Http/Controllers');
+        // Use realpath to resolve any relative paths to absolute paths
+        self::$controllerPath = $path ? realpath($path) : app_path('Http/Controllers');
         self::$controllerNamespace = $namespace ?? 'App\\Http\\Controllers';
     }
 
@@ -101,16 +102,22 @@ class RouteMaker
 
         try {
             $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
+            
+            // Reset the iterator to use it again
+            $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
         } catch (DirectoryNotFoundException $e) {
             Log::error("Controller directory not found: {$controllerPath}");
-
             return [];
         }
 
         foreach ($files as $file) {
-            $relativePath = str_replace([$controllerPath.'/', '.php'], ['', ''], $file->getRealPath());
-            $class = $namespace.'\\'.str_replace('/', '\\', $relativePath);
-
+            // Get just the filename without extension for class name
+            $filename = $file->getFilename();
+            $className = pathinfo($filename, PATHINFO_FILENAME);
+            
+            // Build the class name from the namespace and filename
+            $class = $namespace . '\\' . $className;
+            
             if (! class_exists($class)) {
                 continue;
             }
@@ -151,11 +158,19 @@ class RouteMaker
                 $controllerMiddleware = is_array($middlewareValue) ? $middlewareValue : [$middlewareValue];
             }
 
-            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-                if ($method->class !== $class) {
-                    continue;
+            // Get all public methods from the controller
+            $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+            $controllerMethods = [];
+            
+            // Filter out inherited methods
+            foreach ($methods as $method) {
+                if ($method->class === $class) {
+                    $controllerMethods[] = $method;
                 }
+            }
 
+            // Process each controller method
+            foreach ($controllerMethods as $method) {
                 self::processControllerMethod($method, $reflection, $class, $controllerMiddleware, $routePrefix, $groupedRoutes);
             }
         } catch (ReflectionException $e) {
@@ -181,6 +196,11 @@ class RouteMaker
         ?string $routePrefix,
         array &$groupedRoutes
     ): void {
+        // Skip methods in parent class
+        if ($method->class !== $class) {
+            return;
+        }
+        
         $attributes = $method->getAttributes(Route::class);
         $routeAttr = ! empty($attributes) ? $attributes[0]->newInstance() : null;
 
@@ -214,6 +234,13 @@ class RouteMaker
 
         // Group routes by prefix for organization
         $groupKey = $routePrefix ?? '/';
+        
+        // Initialize the group if it doesn't exist
+        if (!isset($groupedRoutes[$groupKey])) {
+            $groupedRoutes[$groupKey] = [];
+        }
+        
+        // Add the route definition to the group
         $groupedRoutes[$groupKey][] = $definition;
     }
 
@@ -295,6 +322,18 @@ class RouteMaker
         } else {
             $baseUri = self::getControllerBaseName($controllerName);
             $uri = '/'.$baseUri;
+        }
+
+        // Apply RESTful method conventions if no parameters are provided
+        if (empty($parameters)) {
+            // Methods that typically operate on individual resources
+            if (in_array($methodName, ['show', 'edit', 'update', 'destroy'])) {
+                // Add {id} parameter for resource methods
+                $uri = rtrim($uri, '/') . '/{id}';
+            } elseif ($methodName !== 'index' && $methodName !== 'create' && $methodName !== 'store') {
+                // For non-standard methods, append the method name to differentiate
+                $uri = rtrim($uri, '/') . '/' . Str::kebab($methodName);
+            }
         }
 
         // Add parameters if present

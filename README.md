@@ -87,8 +87,18 @@ class ContactController extends Controller
 The generated route definition will look like:
 
 ```php
-Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('Controllers.ContactController.show');
+Route::get('/contact/{id}', [\App\Http\Controllers\ContactController::class, 'show'])->name('Controllers.ContactController.show');
 ```
+
+### Smart URI Generation
+
+Route Maker intelligently generates URIs based on RESTful controller method conventions:
+
+- `index()`, `create()`, `store()`: `/resource`
+- `show()`, `edit()`, `update()`, `destroy()`: `/resource/{id}`
+- Other custom methods: `/resource/method-name`
+
+This automatic URI generation prevents route conflicts when a controller has multiple methods with the same HTTP verb.
 
 ### Setting route parameters and other properties.
 

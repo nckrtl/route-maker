@@ -18,7 +18,13 @@ test('it correctly generates URIs for different scenarios', function () {
     $testCases = [
         // prefix, customUri, parameters, controllerName, methodName, expected
         [null, null, null, 'UserController', 'index', '/user'],
-        [null, null, null, 'UserController', 'show', '/user'],
+        [null, null, null, 'UserController', 'show', '/user/{id}'],
+        [null, null, null, 'UserController', 'edit', '/user/{id}'],
+        [null, null, null, 'UserController', 'update', '/user/{id}'],
+        [null, null, null, 'UserController', 'destroy', '/user/{id}'],
+        [null, null, null, 'UserController', 'store', '/user'],
+        [null, null, null, 'UserController', 'create', '/user'],
+        [null, null, null, 'UserController', 'custom', '/user/custom'],
         ['admin', null, null, 'UserController', 'index', '/admin'],
         [null, 'custom/uri', null, 'UserController', 'index', '/custom/uri'],
         [null, '/custom/uri', null, 'UserController', 'index', '/custom/uri'],
