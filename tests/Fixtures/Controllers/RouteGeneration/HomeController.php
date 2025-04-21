@@ -4,7 +4,6 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Route;
 
 class HomeController extends Controller
 {

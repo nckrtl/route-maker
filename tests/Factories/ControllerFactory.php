@@ -8,9 +8,13 @@ use NckRtl\RouteMaker\Enums\HttpMethod;
 class ControllerFactory
 {
     private string $namespace = 'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp';
+
     private string $className;
+
     private ?string $routePrefix = null;
+
     private array $routeMiddleware = [];
+
     private array $methods = [];
 
     /**
@@ -35,6 +39,7 @@ class ControllerFactory
     public function withNamespace(string $namespace): self
     {
         $this->namespace = $namespace;
+
         return $this;
     }
 
@@ -44,6 +49,7 @@ class ControllerFactory
     public function withRoutePrefix(?string $prefix): self
     {
         $this->routePrefix = $prefix;
+
         return $this;
     }
 
@@ -53,6 +59,7 @@ class ControllerFactory
     public function withMiddleware(array|string $middleware): self
     {
         $this->routeMiddleware = is_array($middleware) ? $middleware : [$middleware];
+
         return $this;
     }
 
@@ -60,9 +67,9 @@ class ControllerFactory
      * Add a method to the controller.
      */
     public function addMethod(
-        string $name, 
-        ?HttpMethod $httpMethod = null, 
-        ?array $parameters = null, 
+        string $name,
+        ?HttpMethod $httpMethod = null,
+        ?array $parameters = null,
         array|string|null $middleware = null,
         ?string $routeName = null,
         ?string $uri = null
@@ -74,7 +81,7 @@ class ControllerFactory
             'routeName' => $routeName,
             'uri' => $uri,
         ];
-        
+
         return $this;
     }
 
@@ -89,15 +96,15 @@ class ControllerFactory
         $code .= "use Inertia\\Response;\n";
         $code .= "use NckRtl\\RouteMaker\\Route;\n";
         $code .= "use NckRtl\\RouteMaker\\Enums\\HttpMethod;\n\n";
-        
+
         $code .= "class {$this->className} extends Controller\n{\n";
-        
+
         // Add static properties
         if ($this->routePrefix !== null) {
             $code .= "    protected static string \$routePrefix = '{$this->routePrefix}';\n";
         }
-        
-        if (!empty($this->routeMiddleware)) {
+
+        if (! empty($this->routeMiddleware)) {
             if (count($this->routeMiddleware) === 1) {
                 $code .= "    protected static string \$routeMiddleware = '{$this->routeMiddleware[0]}';\n";
             } else {
@@ -105,29 +112,29 @@ class ControllerFactory
                 $code .= "    protected static array \$routeMiddleware = {$middleware};\n";
             }
         }
-        
-        if (!empty($this->routePrefix) || !empty($this->routeMiddleware)) {
+
+        if (! empty($this->routePrefix) || ! empty($this->routeMiddleware)) {
             $code .= "\n";
         }
-        
+
         // Add methods
         foreach ($this->methods as $methodName => $config) {
             // Add method attribute if needed
-            if ($config['httpMethod'] !== null || $config['parameters'] !== null || 
-                $config['middleware'] !== null || $config['routeName'] !== null || 
+            if ($config['httpMethod'] !== null || $config['parameters'] !== null ||
+                $config['middleware'] !== null || $config['routeName'] !== null ||
                 $config['uri'] !== null) {
-                    
+
                 $attributeParts = [];
-                
+
                 if ($config['httpMethod'] !== null) {
                     $attributeParts[] = "method: HttpMethod::{$config['httpMethod']->name}";
                 }
-                
+
                 if ($config['parameters'] !== null) {
                     $params = "['".implode("', '", $config['parameters'])."']";
                     $attributeParts[] = "parameters: {$params}";
                 }
-                
+
                 if ($config['middleware'] !== null) {
                     if (is_array($config['middleware'])) {
                         if (count($config['middleware']) === 1) {
@@ -140,26 +147,26 @@ class ControllerFactory
                         $attributeParts[] = "middleware: '{$config['middleware']}'";
                     }
                 }
-                
+
                 if ($config['routeName'] !== null) {
                     $attributeParts[] = "name: '{$config['routeName']}'";
                 }
-                
+
                 if ($config['uri'] !== null) {
                     $attributeParts[] = "uri: '{$config['uri']}'";
                 }
-                
-                $attributes = implode(", ", $attributeParts);
+
+                $attributes = implode(', ', $attributeParts);
                 $code .= "    #[Route({$attributes})]\n";
             }
-            
+
             // Add method signature and body
-            $hasParameters = !empty($config['parameters']);
+            $hasParameters = ! empty($config['parameters']);
             $paramSignature = $hasParameters ? '$param' : '';
-            
+
             $code .= "    public function {$methodName}({$paramSignature}): Response\n";
             $code .= "    {\n";
-            
+
             $viewName = ucfirst(str_replace('_', '/', $methodName));
             if ($hasParameters) {
                 $code .= "        return inertia('{$viewName}', [\n";
@@ -168,13 +175,13 @@ class ControllerFactory
             } else {
                 $code .= "        return inertia('{$viewName}');\n";
             }
-            
+
             $code .= "    }\n\n";
         }
-        
+
         $code = rtrim($code, "\n");
         $code .= "\n}\n";
-        
+
         return $code;
     }
 
@@ -183,8 +190,9 @@ class ControllerFactory
      */
     public function save(string $path): string
     {
-        $fullPath = rtrim($path, '/') . '/' . $this->className . '.php';
+        $fullPath = rtrim($path, '/').'/'.$this->className.'.php';
         File::put($fullPath, $this->generate());
+
         return $fullPath;
     }
 }
