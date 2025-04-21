@@ -4,8 +4,8 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Route;
 use NckRtl\RouteMaker\Enums\HttpMethod;
+use NckRtl\RouteMaker\Route;
 
 class MethodDefaultsTestController extends Controller
 {

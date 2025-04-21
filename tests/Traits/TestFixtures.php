@@ -16,8 +16,8 @@ trait TestFixtures
     protected function setUpFixtures(): void
     {
         $this->tempPath = __DIR__.'/../../tests/Http/Controllers/temp';
-        
-        if (!File::isDirectory($this->tempPath)) {
+
+        if (! File::isDirectory($this->tempPath)) {
             File::makeDirectory($this->tempPath, 0777, true);
         }
     }
@@ -39,13 +39,13 @@ trait TestFixtures
     {
         $sourcePath = __DIR__.'/../Fixtures/Controllers/'.$source;
         $destPath = $this->tempPath.'/'.($destination ?? basename($source));
-        
+
         if (File::exists($sourcePath)) {
             File::copy($sourcePath, $destPath);
         } else {
             throw new \InvalidArgumentException("Fixture not found: {$sourcePath}");
         }
-        
+
         return $destPath;
     }
 
@@ -55,11 +55,11 @@ trait TestFixtures
     protected function copyFixtureControllers(string $subDirectory): void
     {
         $sourcePath = __DIR__.'/../Fixtures/Controllers/'.$subDirectory;
-        
-        if (!File::isDirectory($sourcePath)) {
+
+        if (! File::isDirectory($sourcePath)) {
             throw new \InvalidArgumentException("Fixture directory not found: {$sourcePath}");
         }
-        
+
         foreach (File::files($sourcePath) as $file) {
             File::copy($file->getPathname(), $this->tempPath.'/'.basename($file));
         }
@@ -75,18 +75,18 @@ trait TestFixtures
             'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp'
         );
     }
-    
+
     /**
      * Debug helper to list all controllers in the temp directory.
      */
     protected function debugControllers(): array
     {
         $result = [];
-        
+
         if (File::isDirectory($this->tempPath)) {
-            $finder = new Finder();
+            $finder = new Finder;
             $files = $finder->files()->in($this->tempPath)->name('*Controller.php');
-            
+
             foreach ($files as $file) {
                 $result[] = [
                     'filename' => $file->getFilename(),
@@ -96,7 +96,7 @@ trait TestFixtures
                 ];
             }
         }
-        
+
         return $result;
     }
 }

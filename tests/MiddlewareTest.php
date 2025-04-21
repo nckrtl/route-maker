@@ -1,7 +1,6 @@
 <?php
 
 use NckRtl\RouteMaker\Route;
-use NckRtl\RouteMaker\Enums\HttpMethod;
 use NckRtl\RouteMaker\RouteMaker;
 use NckRtl\RouteMaker\Tests\Traits\TestFixtures;
 
@@ -15,58 +14,58 @@ test('it correctly merges controller and method middleware', function () {
     $reflectionClass = new ReflectionClass(RouteMaker::class);
     $processControllerMethodMethod = $reflectionClass->getMethod('processControllerMethod');
     $processControllerMethodMethod->setAccessible(true);
-    
+
     $formatMiddlewareMethod = $reflectionClass->getMethod('formatMiddleware');
     $formatMiddlewareMethod->setAccessible(true);
-    
+
     // Test different middleware combinations
     $testCases = [
         // controller middleware, method middleware, expected result
         [
-            ['controller-mw'], 
-            ['method-mw'], 
-            ['controller-mw', 'method-mw']
+            ['controller-mw'],
+            ['method-mw'],
+            ['controller-mw', 'method-mw'],
         ],
         [
-            ['controller-mw'], 
-            ['controller-mw', 'method-mw'], 
-            ['controller-mw', 'method-mw'] // Duplicates should be removed
+            ['controller-mw'],
+            ['controller-mw', 'method-mw'],
+            ['controller-mw', 'method-mw'], // Duplicates should be removed
         ],
         [
-            ['auth', 'api'], 
-            ['throttle'], 
-            ['auth', 'api', 'throttle']
+            ['auth', 'api'],
+            ['throttle'],
+            ['auth', 'api', 'throttle'],
         ],
         [
-            [], 
-            ['method-only'], 
-            ['method-only']
+            [],
+            ['method-only'],
+            ['method-only'],
         ],
         [
-            ['controller-only'], 
-            [], 
-            ['controller-only']
+            ['controller-only'],
+            [],
+            ['controller-only'],
         ],
         [
-            [], 
-            [], 
-            []
+            [],
+            [],
+            [],
         ],
     ];
-    
+
     // Create a route maker instance
-    $routeMaker = new RouteMaker();
-    
+    $routeMaker = new RouteMaker;
+
     // Test each case
     foreach ($testCases as [$controllerMiddleware, $methodMiddleware, $expected]) {
         // Directly test the array_unique(array_merge()) logic used in the class
         $merged = array_values(array_unique(array_merge($controllerMiddleware, $methodMiddleware)));
         expect($merged)->toBe($expected);
-        
+
         // Also test the middleware formatting method
-        if (!empty($merged)) {
+        if (! empty($merged)) {
             $formatted = $formatMiddlewareMethod->invoke(null, $merged);
-            
+
             if (count($merged) === 1) {
                 expect($formatted)->toBe("'".$merged[0]."'");
             } else {

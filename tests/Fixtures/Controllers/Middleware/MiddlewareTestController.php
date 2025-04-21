@@ -4,12 +4,13 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Route;
 use NckRtl\RouteMaker\Enums\HttpMethod;
+use NckRtl\RouteMaker\Route;
 
 class MiddlewareTestController extends Controller
 {
     protected static string $routePrefix = 'middleware-test';
+
     protected static array $routeMiddleware = ['controller-mw'];
 
     #[Route(method: HttpMethod::POST, middleware: 'method-mw')]

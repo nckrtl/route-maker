@@ -46,46 +46,46 @@ test('it correctly groups routes by prefix', function () {
     $reflectionClass = new ReflectionClass(RouteMaker::class);
     $flattenMethod = $reflectionClass->getMethod('flattenGroupedRoutes');
     $flattenMethod->setAccessible(true);
-    
+
     // Create a sample grouped routes array
     $groupedRoutes = [
         'api' => [
             "Route::get('/api/users', [\\App\\Http\\Controllers\\UserController::class, 'index'])->name('api.users.index');",
-            "Route::post('/api/users', [\\App\\Http\\Controllers\\UserController::class, 'store'])->name('api.users.store');"
+            "Route::post('/api/users', [\\App\\Http\\Controllers\\UserController::class, 'store'])->name('api.users.store');",
         ],
         'admin' => [
-            "Route::get('/admin/dashboard', [\\App\\Http\\Controllers\\Admin\\DashboardController::class, 'index'])->name('admin.dashboard');"
+            "Route::get('/admin/dashboard', [\\App\\Http\\Controllers\\Admin\\DashboardController::class, 'index'])->name('admin.dashboard');",
         ],
         '/' => [
-            "Route::get('/', [\\App\\Http\\Controllers\\HomeController::class, 'index'])->name('home');"
-        ]
+            "Route::get('/', [\\App\\Http\\Controllers\\HomeController::class, 'index'])->name('home');",
+        ],
     ];
-    
+
     // Test flattening logic
     $flattened = $flattenMethod->invoke(null, $groupedRoutes);
-    
+
     // Verify the flattened routes structure includes each group
     // and has the correct routes in each group
-    
+
     // Convert to a string for easier searching
     $flattenedString = implode("\n", $flattened);
-    
+
     // Check for groups
     expect($flattenedString)->toContain('// /api');
     expect($flattenedString)->toContain('// /admin');
     expect($flattenedString)->toContain('// /');
-    
+
     // Check for routes
-    expect($flattenedString)->toContain("/api/users");
-    expect($flattenedString)->toContain("Route::get");
-    expect($flattenedString)->toContain("Route::post");
-    expect($flattenedString)->toContain("/admin/dashboard");
-    
+    expect($flattenedString)->toContain('/api/users');
+    expect($flattenedString)->toContain('Route::get');
+    expect($flattenedString)->toContain('Route::post');
+    expect($flattenedString)->toContain('/admin/dashboard');
+
     // Test for the home route - the format might vary, so check for key components
-    expect($flattenedString)->toContain("HomeController");
+    expect($flattenedString)->toContain('HomeController');
     expect($flattenedString)->toContain("'index'");
     expect($flattenedString)->toContain("'home'");
-    
+
     // Check that there are blank lines between groups
     expect($flattenedString)->toContain("\n\n");
 });

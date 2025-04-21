@@ -13,7 +13,7 @@ test('it correctly generates URIs for different scenarios', function () {
     $reflectionClass = new ReflectionClass(RouteMaker::class);
     $generateUriMethod = $reflectionClass->getMethod('generateUri');
     $generateUriMethod->setAccessible(true);
-    
+
     // Test cases for generateUri
     $testCases = [
         // prefix, customUri, parameters, controllerName, methodName, expected
@@ -30,10 +30,10 @@ test('it correctly generates URIs for different scenarios', function () {
         ['', null, null, 'UserController', 'index', '/user'],
         [null, '/', null, 'UserController', 'index', '/'],
     ];
-    
+
     // Create a RouteMaker instance
-    $routeMaker = new RouteMaker();
-    
+    $routeMaker = new RouteMaker;
+
     // Test each case
     foreach ($testCases as [$prefix, $customUri, $parameters, $controllerName, $methodName, $expected]) {
         $uri = $generateUriMethod->invokeArgs(null, [$prefix, $customUri, $parameters, $controllerName, $methodName]);
