@@ -1,6 +1,5 @@
 <?php
 
-use NckRtl\RouteMaker\Enums\HttpMethod;
 use NckRtl\RouteMaker\RouteMaker;
 use NckRtl\RouteMaker\Tests\Traits\TestFixtures;
 
@@ -8,7 +7,7 @@ uses(TestFixtures::class);
 
 beforeEach(function () {
     $this->setUpFixtures();
-    
+
     // Create a controller with multiple methods
     $multiMethodControllerContent = <<<'PHP'
 <?php
@@ -44,13 +43,13 @@ class MultiMethodController extends Controller
 PHP;
 
     // Create a temporary directory if it doesn't exist
-    if (!is_dir($this->tempPath)) {
+    if (! is_dir($this->tempPath)) {
         mkdir($this->tempPath, 0777, true);
     }
-    
+
     // Write the controller to a file
-    file_put_contents($this->tempPath . '/MultiMethodController.php', $multiMethodControllerContent);
-    
+    file_put_contents($this->tempPath.'/MultiMethodController.php', $multiMethodControllerContent);
+
     // Set up RouteMaker to use our temp path
     RouteMaker::setControllerPath($this->tempPath, 'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp');
 });
@@ -65,10 +64,10 @@ afterEach(function () {
 test('it generates routes for controllers with multiple methods', function () {
     // Generate routes
     $routes = RouteMaker::generateRouteDefinitions();
-    
+
     // Build the expected route definitions
     $namespace = 'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp';
-    
+
     $expectedRoutes = [
         // Group header
         '// /',
@@ -79,19 +78,19 @@ test('it generates routes for controllers with multiple methods', function () {
         // Blank line at the end
         '',
     ];
-    
+
     // Check each expected route definition
     foreach ($expectedRoutes as $route) {
         expect($routes)->toContain($route);
     }
-    
+
     // Make sure we have the correct number of elements in the routes array
     expect(count($routes))->toBe(5);
-    
+
     // Verify specific routes have the correct URIs
     expect($routes[1])->toBe("Route::get('/multi-method', [\\{$namespace}\\MultiMethodController::class, 'index'])->name('Controllers.MultiMethodController.index');");
     expect($routes[2])->toBe("Route::get('/multi-method/{id}', [\\{$namespace}\\MultiMethodController::class, 'show'])->name('Controllers.MultiMethodController.show');");
-    
+
     // Verify the order of routes
     expect($routes[0])->toBe('// /');
     expect($routes[4])->toBe('');

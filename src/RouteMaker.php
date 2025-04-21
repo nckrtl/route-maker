@@ -102,11 +102,12 @@ class RouteMaker
 
         try {
             $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
-            
+
             // Reset the iterator to use it again
             $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
         } catch (DirectoryNotFoundException $e) {
             Log::error("Controller directory not found: {$controllerPath}");
+
             return [];
         }
 
@@ -114,10 +115,10 @@ class RouteMaker
             // Get just the filename without extension for class name
             $filename = $file->getFilename();
             $className = pathinfo($filename, PATHINFO_FILENAME);
-            
+
             // Build the class name from the namespace and filename
-            $class = $namespace . '\\' . $className;
-            
+            $class = $namespace.'\\'.$className;
+
             if (! class_exists($class)) {
                 continue;
             }
@@ -161,7 +162,7 @@ class RouteMaker
             // Get all public methods from the controller
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
             $controllerMethods = [];
-            
+
             // Filter out inherited methods
             foreach ($methods as $method) {
                 if ($method->class === $class) {
@@ -200,7 +201,7 @@ class RouteMaker
         if ($method->class !== $class) {
             return;
         }
-        
+
         $attributes = $method->getAttributes(Route::class);
         $routeAttr = ! empty($attributes) ? $attributes[0]->newInstance() : null;
 
@@ -234,12 +235,12 @@ class RouteMaker
 
         // Group routes by prefix for organization
         $groupKey = $routePrefix ?? '/';
-        
+
         // Initialize the group if it doesn't exist
-        if (!isset($groupedRoutes[$groupKey])) {
+        if (! isset($groupedRoutes[$groupKey])) {
             $groupedRoutes[$groupKey] = [];
         }
-        
+
         // Add the route definition to the group
         $groupedRoutes[$groupKey][] = $definition;
     }
@@ -329,10 +330,10 @@ class RouteMaker
             // Methods that typically operate on individual resources
             if (in_array($methodName, ['show', 'edit', 'update', 'destroy'])) {
                 // Add {id} parameter for resource methods
-                $uri = rtrim($uri, '/') . '/{id}';
+                $uri = rtrim($uri, '/').'/{id}';
             } elseif ($methodName !== 'index' && $methodName !== 'create' && $methodName !== 'store') {
                 // For non-standard methods, append the method name to differentiate
-                $uri = rtrim($uri, '/') . '/' . Str::kebab($methodName);
+                $uri = rtrim($uri, '/').'/'.Str::kebab($methodName);
             }
         }
 
