@@ -66,6 +66,30 @@ RouteMaker::routes();
 
 Now you're all set. Running vite dev should nog generate the routes based on your controller methods. On file change of any controller the routes file will be regenerated.
 
+### Route definition structure
+
+The way routes are generated are pretty opionated. The naming convention of routes is inspired by how Laravel Wayfinder exposes routes/actions. For this controller:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+class ContactController extends Controller
+{
+    public function show(): \Inertia\Response
+    {
+        return inertia('Contact');
+    }
+}
+```
+
+The generated route definition will look like:
+
+```php
+Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('Controllers.ContactController.show');
+```
+
 ### Setting route parameters and other properties.
 
 To influence the route that is being generated you can you the `Route` attribute. For example you can define a route parameter like so:
