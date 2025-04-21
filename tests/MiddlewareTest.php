@@ -69,10 +69,10 @@ test('it correctly merges controller and method middleware', function () {
 
     $namespace = 'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp';
 
-    $expectedPostRoute = "Route::post('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'store'])->name('middleware-test.store')->middleware(['controller-mw', 'method-mw']);";
-    $expectedGetRoute = "Route::get('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'index'])->name('middleware-test.index')->middleware(['controller-mw', 'method-mw', 'another-mw']);";
-    $expectedNoMethodMwRoute = "Route::get('/no-method-mw', [\\".$namespace."\\MiddlewareTestController::class, 'noMethodMiddleware'])->name('middleware-test.noMethodMiddleware')->middleware('controller-mw');";
-    $expectedPutRoute = "Route::put('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'update'])->name('middleware-test.update')->middleware(['controller-mw', 'unique-method-mw']);";
+    $expectedPostRoute = "Route::post('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'store'])->name('Controllers.MiddlewareTestController.store')->middleware(['controller-mw', 'method-mw']);";
+    $expectedGetRoute = "Route::get('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'index'])->name('Controllers.MiddlewareTestController.index')->middleware(['controller-mw', 'method-mw', 'another-mw']);";
+    $expectedNoMethodMwRoute = "Route::get('/no-method-mw', [\\".$namespace."\\MiddlewareTestController::class, 'noMethodMiddleware'])->name('Controllers.MiddlewareTestController.noMethodMiddleware')->middleware('controller-mw');";
+    $expectedPutRoute = "Route::put('/middleware-test', [\\".$namespace."\\MiddlewareTestController::class, 'update'])->name('Controllers.MiddlewareTestController.update')->middleware(['controller-mw', 'unique-method-mw']);";
 
     expect($definitions)->toContain($expectedPostRoute);
     expect($definitions)->toContain($expectedGetRoute);

@@ -82,20 +82,20 @@ test('it applies correct HTTP method defaults based on method names', function (
     $namespace = 'NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp';
 
     // Test default GET methods
-    $expectedIndexRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'index'])->name('test.index');";
-    $expectedShowRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'show'])->name('test.show');";
+    $expectedIndexRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'index'])->name('Controllers.MethodDefaultsTestController.index');";
+    $expectedShowRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'show'])->name('Controllers.MethodDefaultsTestController.show');";
 
     // Test default POST method
-    $expectedStoreRoute = "Route::post('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'store'])->name('test.store');";
+    $expectedStoreRoute = "Route::post('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'store'])->name('Controllers.MethodDefaultsTestController.store');";
 
     // Test default PUT method
-    $expectedUpdateRoute = "Route::put('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'update'])->name('test.update');";
+    $expectedUpdateRoute = "Route::put('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'update'])->name('Controllers.MethodDefaultsTestController.update');";
 
     // Test default DELETE method
-    $expectedDestroyRoute = "Route::delete('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'destroy'])->name('test.destroy');";
+    $expectedDestroyRoute = "Route::delete('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'destroy'])->name('Controllers.MethodDefaultsTestController.destroy');";
 
     // Test explicit method override
-    $expectedOverrideRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'store_override'])->name('test.store_override');";
+    $expectedOverrideRoute = "Route::get('/test', [\\".$namespace."\\MethodDefaultsTestController::class, 'store_override'])->name('Controllers.MethodDefaultsTestController.store_override');";
 
     expect($routes)->toContain($expectedIndexRoute);
     expect($routes)->toContain($expectedShowRoute);

@@ -37,6 +37,11 @@ class RouteMaker
         return null;
     }
 
+    protected static function getControllerBaseName(string $controllerName): string
+    {
+        return Str::kebab(str_replace('Controller', '', $controllerName));
+    }
+
     public static function generateRouteDefinitions(): array
     {
         $groupedRoutes = [];
@@ -82,8 +87,8 @@ class RouteMaker
                 $httpMethod = $routeAttr ? $routeAttr->method : (self::getMethodDefault($method->name) ?? HttpMethod::GET);
                 $httpMethod = strtolower($httpMethod->value);
 
-                $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters);
-                $routeName = self::generateRouteName($routePrefix, $method->name, $routeAttr?->name);
+                $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters, $reflection->getShortName(), $method->name);
+                $routeName = self::generateRouteName($method->name, $routeAttr?->name, $reflection->getShortName());
 
                 $escapedClass = '\\'.ltrim($class, '\\');
                 $definition = sprintf(
@@ -128,13 +133,19 @@ class RouteMaker
         return '[\''.implode("', '", $middleware).'\']';
     }
 
-    protected static function generateUri(?string $prefix, ?string $customUri, ?array $parameters): string
+    protected static function generateUri(?string $prefix, ?string $customUri, ?array $parameters, string $controllerName, string $methodName): string
     {
         if ($customUri) {
             return '/'.ltrim($customUri, '/');
         }
 
-        $uri = $prefix ? '/'.trim($prefix, '/') : '/';
+        if ($prefix) {
+            $uri = '/'.trim($prefix, '/');
+        } else {
+            // Use controller name as base URI for show method, otherwise use controller name with method
+            $baseUri = self::getControllerBaseName($controllerName);
+            $uri = $methodName === 'show' ? '/'.$baseUri : '/'.$baseUri;
+        }
 
         if ($parameters) {
             $wrappedParams = array_map(fn ($param) => '{'.$param.'}', $parameters);
@@ -144,16 +155,13 @@ class RouteMaker
         return trim($uri, '/') === '' ? '/' : $uri;
     }
 
-    protected static function generateRouteName(?string $prefix, string $methodName, ?string $customName): string
+    protected static function generateRouteName(string $methodName, ?string $customName, string $controllerName): string
     {
         if ($customName) {
             return $customName;
         }
 
-        if ($prefix) {
-            return Str::singular($prefix).'.'.$methodName;
-        }
-
-        return $methodName === 'show' ? 'home' : $methodName;
+        // Always use Controllers.{ControllerName}.{method} format unless a custom name is provided
+        return sprintf('Controllers.%s.%s', $controllerName, $methodName);
     }
 }
