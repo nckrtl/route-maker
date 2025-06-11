@@ -31,7 +31,8 @@ return [
         'GET' => ['index', 'show'],
         'POST' => ['store'],
         'PUT' => ['update'],
-        'DELETE' => ['destroy'],,
+        'DELETE' => ['destroy'],
+        'PATCH' => ['edit'],
     ],
 ];
 ```
@@ -102,14 +103,14 @@ This automatic URI generation prevents route conflicts when a controller has mul
 
 ### Setting route parameters and other properties.
 
-To influence the route that is being generated you can you the `Route` attribute. For example you can define a route parameter like so:
+To influence the route that is being generated you can use specific HTTP method attributes. For example, you can define a route parameter like so:
 
 ```php
-use NckRtl\RouteMaker\Route;
+use NckRtl\RouteMaker\Get;
 
 ...
 
-#[Route(parameters: ['article:slug'])]
+#[Get(parameters: ['article:slug'])]
 public function show(Article $article): \Inertia\Response
 {
     return inertia('Article/Show', [
@@ -118,7 +119,56 @@ public function show(Article $article): \Inertia\Response
 }
 ```
 
-Other route properties are also supported like `middleware`. Besides setting middelware on specific methods you can also set them at the controller level, just as a prefix:
+#### Available HTTP Method Attributes
+
+Route Maker provides specific attributes for each HTTP method:
+
+- `#[Get]` - For GET requests
+- `#[Post]` - For POST requests
+- `#[Put]` - For PUT requests
+- `#[Patch]` - For PATCH requests
+- `#[Delete]` - For DELETE requests
+
+Each attribute supports the following properties:
+- `uri` - Custom URI path (optional)
+- `name` - Custom route name (optional)
+- `parameters` - Route parameters array (optional)
+- `middleware` - Route-specific middleware (optional)
+
+#### Examples
+
+```php
+use NckRtl\RouteMaker\{Get, Post, Put, Delete};
+
+class ArticleController extends Controller
+{
+    #[Get]
+    public function index(): \Inertia\Response
+    {
+        // GET /articles
+    }
+
+    #[Post(middleware: 'throttle:5,1')]
+    public function store(Request $request): RedirectResponse
+    {
+        // POST /articles with rate limiting
+    }
+
+    #[Put(parameters: ['article:slug'])]
+    public function update(Request $request, Article $article): RedirectResponse
+    {
+        // PUT /articles/{article:slug}
+    }
+
+    #[Delete(name: 'articles.remove')]
+    public function destroy(Article $article): RedirectResponse
+    {
+        // DELETE /articles/{id} with custom route name
+    }
+}
+```
+
+Other route properties are also supported like `middleware`. Besides setting middleware on specific methods you can also set them at the controller level, just as a prefix:
 
 ```php
 class ArticleController extends Controller

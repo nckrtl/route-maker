@@ -4,8 +4,7 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Enums\HttpMethod;
-use NckRtl\RouteMaker\Route;
+use NckRtl\RouteMaker\Get;
 
 class MethodDefaultsTestController extends Controller
 {
@@ -42,7 +41,7 @@ class MethodDefaultsTestController extends Controller
     }
 
     // Method with explicit HTTP method - should override default
-    #[Route(method: HttpMethod::GET)]
+    #[Get]
     public function store_override(): Response
     {
         return inertia('Test/StoreOverride');

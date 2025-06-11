@@ -4,8 +4,11 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Enums\HttpMethod;
-use NckRtl\RouteMaker\Route;
+use NckRtl\RouteMaker\Delete;
+use NckRtl\RouteMaker\Get;
+use NckRtl\RouteMaker\Patch;
+use NckRtl\RouteMaker\Post;
+use NckRtl\RouteMaker\Put;
 
 class ArticleController extends Controller
 {
@@ -13,7 +16,7 @@ class ArticleController extends Controller
 
     protected static array $routeMiddleware = ['auth', 'verified'];
 
-    #[Route(parameters: ['article:slug'])]
+    #[Get(parameters: ['article:slug'])]
     public function show(string $article): Response
     {
         return inertia('Article/Show', [
@@ -21,13 +24,13 @@ class ArticleController extends Controller
         ]);
     }
 
-    #[Route(method: HttpMethod::POST)]
+    #[Post]
     public function store(): Response
     {
         return inertia('Article/Store');
     }
 
-    #[Route(method: HttpMethod::PUT, parameters: ['article:slug'])]
+    #[Put(parameters: ['article:slug'])]
     public function update(string $article): Response
     {
         return inertia('Article/Update', [
@@ -35,7 +38,7 @@ class ArticleController extends Controller
         ]);
     }
 
-    #[Route(method: HttpMethod::PATCH, parameters: ['article:slug'])]
+    #[Patch(parameters: ['article:slug'])]
     public function edit(string $article): Response
     {
         return inertia('Article/Edit', [
@@ -43,7 +46,7 @@ class ArticleController extends Controller
         ]);
     }
 
-    #[Route(method: HttpMethod::DELETE, parameters: ['article:slug'])]
+    #[Delete(parameters: ['article:slug'])]
     public function destroy(string $article): Response
     {
         return inertia('Article/Destroy', [

@@ -94,7 +94,7 @@ class ControllerFactory
         $code .= "namespace {$this->namespace};\n\n";
         $code .= "use Illuminate\\Routing\\Controller;\n";
         $code .= "use Inertia\\Response;\n";
-        $code .= "use NckRtl\\RouteMaker\\Route;\n";
+        $code .= "use NckRtl\\RouteMaker\\{Delete, Get, Patch, Post, Put};\n";
         $code .= "use NckRtl\\RouteMaker\\Enums\\HttpMethod;\n\n";
 
         $code .= "class {$this->className} extends Controller\n{\n";
@@ -124,40 +124,53 @@ class ControllerFactory
                 $config['middleware'] !== null || $config['routeName'] !== null ||
                 $config['uri'] !== null) {
 
-                $attributeParts = [];
+                $httpMethod = $config['httpMethod'];
+                $attributeName = match ($httpMethod?->name) {
+                    'GET' => 'Get',
+                    'POST' => 'Post',
+                    'PUT' => 'Put',
+                    'PATCH' => 'Patch',
+                    'DELETE' => 'Delete',
+                    default => null
+                };
 
-                if ($config['httpMethod'] !== null) {
-                    $attributeParts[] = "method: HttpMethod::{$config['httpMethod']->name}";
-                }
+                if ($attributeName !== null || $config['parameters'] !== null ||
+                    $config['middleware'] !== null || $config['routeName'] !== null ||
+                    $config['uri'] !== null) {
 
-                if ($config['parameters'] !== null) {
-                    $params = "['".implode("', '", $config['parameters'])."']";
-                    $attributeParts[] = "parameters: {$params}";
-                }
+                    $attributeParts = [];
 
-                if ($config['middleware'] !== null) {
-                    if (is_array($config['middleware'])) {
-                        if (count($config['middleware']) === 1) {
-                            $attributeParts[] = "middleware: '{$config['middleware'][0]}'";
+                    if ($config['parameters'] !== null) {
+                        $params = "['".implode("', '", $config['parameters'])."']";
+                        $attributeParts[] = "parameters: {$params}";
+                    }
+
+                    if ($config['middleware'] !== null) {
+                        if (is_array($config['middleware'])) {
+                            if (count($config['middleware']) === 1) {
+                                $attributeParts[] = "middleware: '{$config['middleware'][0]}'";
+                            } else {
+                                $middleware = "['".implode("', '", $config['middleware'])."']";
+                                $attributeParts[] = "middleware: {$middleware}";
+                            }
                         } else {
-                            $middleware = "['".implode("', '", $config['middleware'])."']";
-                            $attributeParts[] = "middleware: {$middleware}";
+                            $attributeParts[] = "middleware: '{$config['middleware']}'";
                         }
-                    } else {
-                        $attributeParts[] = "middleware: '{$config['middleware']}'";
+                    }
+
+                    if ($config['routeName'] !== null) {
+                        $attributeParts[] = "name: '{$config['routeName']}'";
+                    }
+
+                    if ($config['uri'] !== null) {
+                        $attributeParts[] = "uri: '{$config['uri']}'";
+                    }
+
+                    if ($attributeName !== null) {
+                        $attributes = implode(', ', $attributeParts);
+                        $code .= "    #[{$attributeName}({$attributes})]\n";
                     }
                 }
-
-                if ($config['routeName'] !== null) {
-                    $attributeParts[] = "name: '{$config['routeName']}'";
-                }
-
-                if ($config['uri'] !== null) {
-                    $attributeParts[] = "uri: '{$config['uri']}'";
-                }
-
-                $attributes = implode(', ', $attributeParts);
-                $code .= "    #[Route({$attributes})]\n";
             }
 
             // Add method signature and body

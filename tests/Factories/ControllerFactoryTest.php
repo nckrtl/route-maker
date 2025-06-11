@@ -35,8 +35,8 @@ test('it can generate controllers dynamically for testing', function () {
     expect($code)->toMatch('/public function show\(\$param\): Response/');
 
     // Check attribute usage
-    expect($code)->toMatch('/#\[Route\(method: HttpMethod::POST, middleware: \'verified\'\)\]/');
-    expect($code)->toMatch('/#\[Route\(method: HttpMethod::PUT, parameters: \[\'id\'\], middleware: \[\'throttle\', \'cache\'\], name: \'custom\.route\', uri: \'custom-uri\'\)\]/');
+    expect($code)->toMatch('/#\[Post\(middleware: \'verified\'\)\]/');
+    expect($code)->toMatch('/#\[Put\(parameters: \[\'id\'\], middleware: \[\'throttle\', \'cache\'\], name: \'custom\.route\', uri: \'custom-uri\'\)\]/');
 
     // Check method content - return statements
     expect($code)->toMatch('/return inertia\(\'Index\'\);/');

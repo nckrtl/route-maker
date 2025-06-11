@@ -102,22 +102,30 @@ class RouteMaker
 
         try {
             $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
-            
+
             // Reset the iterator to use it again
             $files = (new Finder)->files()->in($controllerPath)->name('*Controller.php');
         } catch (DirectoryNotFoundException $e) {
             Log::error("Controller directory not found: {$controllerPath}");
+
             return [];
         }
 
         foreach ($files as $file) {
-            // Get just the filename without extension for class name
+            // Get the relative path from the controller directory
+            $relativePath = $file->getRelativePath();
             $filename = $file->getFilename();
             $className = pathinfo($filename, PATHINFO_FILENAME);
-            
-            // Build the class name from the namespace and filename
-            $class = $namespace . '\\' . $className;
-            
+
+            // Build the class name including subdirectory namespace
+            if ($relativePath) {
+                // Convert directory separators to namespace separators
+                $relativeNamespace = str_replace('/', '\\', $relativePath);
+                $class = $namespace.'\\'.$relativeNamespace.'\\'.$className;
+            } else {
+                $class = $namespace.'\\'.$className;
+            }
+
             if (! class_exists($class)) {
                 continue;
             }
@@ -161,7 +169,7 @@ class RouteMaker
             // Get all public methods from the controller
             $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
             $controllerMethods = [];
-            
+
             // Filter out inherited methods
             foreach ($methods as $method) {
                 if ($method->class === $class) {
@@ -200,9 +208,16 @@ class RouteMaker
         if ($method->class !== $class) {
             return;
         }
-        
-        $attributes = $method->getAttributes(Route::class);
-        $routeAttr = ! empty($attributes) ? $attributes[0]->newInstance() : null;
+
+        // Look for any route attribute (Get, Post, Put, Patch, Delete)
+        $routeAttr = null;
+        foreach ($method->getAttributes() as $attribute) {
+            $instance = $attribute->newInstance();
+            if ($instance instanceof RouteAttribute) {
+                $routeAttr = $instance;
+                break;
+            }
+        }
 
         // Extract middleware from route attribute
         $routeMiddleware = [];
@@ -234,12 +249,12 @@ class RouteMaker
 
         // Group routes by prefix for organization
         $groupKey = $routePrefix ?? '/';
-        
+
         // Initialize the group if it doesn't exist
-        if (!isset($groupedRoutes[$groupKey])) {
+        if (! isset($groupedRoutes[$groupKey])) {
             $groupedRoutes[$groupKey] = [];
         }
-        
+
         // Add the route definition to the group
         $groupedRoutes[$groupKey][] = $definition;
     }
@@ -329,10 +344,10 @@ class RouteMaker
             // Methods that typically operate on individual resources
             if (in_array($methodName, ['show', 'edit', 'update', 'destroy'])) {
                 // Add {id} parameter for resource methods
-                $uri = rtrim($uri, '/') . '/{id}';
+                $uri = rtrim($uri, '/').'/{id}';
             } elseif ($methodName !== 'index' && $methodName !== 'create' && $methodName !== 'store') {
                 // For non-standard methods, append the method name to differentiate
-                $uri = rtrim($uri, '/') . '/' . Str::kebab($methodName);
+                $uri = rtrim($uri, '/').'/'.Str::kebab($methodName);
             }
         }
 
@@ -373,13 +388,19 @@ class RouteMaker
     private static function flattenGroupedRoutes(array $groupedRoutes): array
     {
         $flattened = [];
+        $isFirst = true;
 
         foreach ($groupedRoutes as $prefix => $routes) {
+            // Add a blank line between groups (but not before the first group)
+            if (! $isFirst) {
+                $flattened[] = '';
+            }
+            $isFirst = false;
+
             $flattened[] = '// /'.trim($prefix, '/');
             foreach ($routes as $definition) {
                 $flattened[] = $definition;
             }
-            $flattened[] = ''; // Add a blank line between groups
         }
 
         return $flattened;

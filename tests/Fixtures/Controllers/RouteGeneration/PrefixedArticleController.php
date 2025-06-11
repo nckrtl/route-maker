@@ -4,13 +4,13 @@ namespace NckRtl\RouteMaker\Tests\Http\Controllers\temp;
 
 use Illuminate\Routing\Controller;
 use Inertia\Response;
-use NckRtl\RouteMaker\Route;
+use NckRtl\RouteMaker\Get;
 
 class ArticleController extends Controller
 {
     protected static string $routePrefix = 'articles';
 
-    #[Route(parameters: ['article:slug'])]
+    #[Get(parameters: ['article:slug'])]
     public function show(): Response
     {
         return inertia('Article/Show');

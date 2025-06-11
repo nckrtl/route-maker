@@ -2,6 +2,14 @@
 
 All notable changes to `route-maker` will be documented in this file.
 
+## v0.3.1 - 2025-01-06
+
+### Fixed
+
+-   Controllers in subdirectories (e.g., Auth/LoginController) are now properly discovered
+-   Fixed namespace generation for controllers in nested directories
+-   Added comprehensive test coverage for subdirectory controller discovery
+
 ## v0.3.0 - 2024-04-21
 
 ### Added
