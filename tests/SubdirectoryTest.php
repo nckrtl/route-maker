@@ -1,8 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use NckRtl\RouteMaker\RouteMaker;
 use NckRtl\RouteMaker\Tests\Traits\TestFixtures;
-use Illuminate\Support\Facades\File;
 
 uses(TestFixtures::class);
 
@@ -18,7 +18,7 @@ test('it discovers controllers in subdirectories', function () {
     // Create a subdirectory structure with controllers
     $authPath = $this->tempPath.'/Auth';
     File::makeDirectory($authPath, 0777, true);
-    
+
     // Create a controller in the root directory
     $homeControllerContent = <<<'PHP'
 <?php
@@ -36,9 +36,9 @@ class HomeController
     }
 }
 PHP;
-    
+
     file_put_contents($this->tempPath.'/HomeController.php', $homeControllerContent);
-    
+
     // Create a controller in the Auth subdirectory
     $loginControllerContent = <<<'PHP'
 <?php
@@ -63,18 +63,18 @@ class LoginController
     }
 }
 PHP;
-    
+
     file_put_contents($authPath.'/LoginController.php', $loginControllerContent);
-    
+
     $this->setupRouteMaker();
-    
+
     $routes = RouteMaker::generateRouteDefinitions();
     $routesString = implode("\n", $routes);
-    
+
     // Check that both controllers are discovered
     expect($routesString)->toContain('HomeController');
     expect($routesString)->toContain('Auth\\LoginController');
-    
+
     // Check specific routes (note: HomeController generates /home not / by default)
     expect($routesString)->toContain("Route::get('/home', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\HomeController::class, 'index'])");
     expect($routesString)->toContain("Route::get('/login', [\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\Auth\\LoginController::class, 'showLoginForm'])");
@@ -85,7 +85,7 @@ test('it generates correct fully qualified class names for controllers in subdir
     // Create a Settings subdirectory
     $settingsPath = $this->tempPath.'/Settings';
     File::makeDirectory($settingsPath, 0777, true);
-    
+
     // Create a controller in the Settings subdirectory
     $profileControllerContent = <<<'PHP'
 <?php
@@ -112,20 +112,20 @@ class ProfileController
     }
 }
 PHP;
-    
+
     file_put_contents($settingsPath.'/ProfileController.php', $profileControllerContent);
-    
+
     $this->setupRouteMaker();
-    
+
     $routes = RouteMaker::generateRouteDefinitions();
-    
+
     // Find routes for the ProfileController
     $profileRoutes = array_filter($routes, function ($route) {
         return str_contains($route, 'ProfileController');
     });
-    
+
     expect($profileRoutes)->not->toBeEmpty();
-    
+
     foreach ($profileRoutes as $route) {
         // Check that the fully qualified class name includes the subdirectory
         expect($route)->toContain('\\NckRtl\\RouteMaker\\Tests\\Http\\Controllers\\temp\\Settings\\ProfileController');
@@ -138,7 +138,7 @@ test('it handles deeply nested controller directories', function () {
     // Create a deeply nested controller structure
     $deepPath = $this->tempPath.'/Admin/Reports/Financial';
     File::makeDirectory($deepPath, 0777, true);
-    
+
     // Create a controller in the deep directory
     $revenueControllerContent = <<<'PHP'
 <?php
@@ -164,14 +164,14 @@ class RevenueController
     }
 }
 PHP;
-    
+
     file_put_contents($deepPath.'/RevenueController.php', $revenueControllerContent);
-    
+
     $this->setupRouteMaker();
-    
+
     $routes = RouteMaker::generateRouteDefinitions();
     $routesString = implode("\n", $routes);
-    
+
     // Check that the deeply nested controller is discovered
     expect($routesString)->toContain('Admin\\Reports\\Financial\\RevenueController');
     expect($routesString)->toContain('/admin/reports/financial/revenue');
