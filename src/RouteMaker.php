@@ -234,7 +234,7 @@ class RouteMaker
 
         // Generate URI and route name
         $uri = self::generateUri($routePrefix, $routeAttr?->uri, $routeAttr?->parameters, $reflection->getShortName(), $method->name);
-        $routeName = self::generateRouteName($method->name, $routeAttr?->name, $reflection->getShortName());
+        $routeName = self::generateRouteName($method->name, $routeAttr?->name, $class);
 
         // Build the route definition
         $escapedClass = '\\'.ltrim($class, '\\');
@@ -366,17 +366,24 @@ class RouteMaker
      *
      * @param  string  $methodName  The method name
      * @param  string|null  $customName  Custom route name from attribute
-     * @param  string  $controllerName  Controller name
+     * @param  string  $controllerClass  Fully qualified controller class name
      * @return string The generated route name
      */
-    private static function generateRouteName(string $methodName, ?string $customName, string $controllerName): string
+    private static function generateRouteName(string $methodName, ?string $customName, string $controllerClass): string
     {
         if ($customName) {
             return $customName;
         }
 
-        // Always use Controllers.{ControllerName}.{method} format unless a custom name is provided
-        return sprintf('Controllers.%s.%s', $controllerName, $methodName);
+        // Extract the controller namespace path relative to the base namespace
+        $baseNamespace = self::$controllerNamespace ?? 'App\\Http\\Controllers';
+        $relativeClass = str_replace($baseNamespace.'\\', '', $controllerClass);
+
+        // Replace namespace separators with dots
+        $namespacePath = str_replace('\\', '.', $relativeClass);
+
+        // Always use Controllers.{NamespacePath}.{method} format unless a custom name is provided
+        return sprintf('Controllers.%s.%s', $namespacePath, $methodName);
     }
 
     /**
